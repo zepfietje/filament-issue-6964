@@ -3,15 +3,13 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
-use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
-use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class UserResource extends Resource
 {
@@ -24,6 +22,39 @@ class UserResource extends Resource
         return $form
             ->schema([
                 //
+            ]);
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->state([
+                'repeatable' => [
+                    [
+                        'name' => 'John Doe',
+                        'email' => 'john@example.com',
+                    ],
+                    [
+                        'name' => 'Jane Doe',
+                        'email' => 'jane@example.com',
+                    ],
+                ],
+            ])
+            ->schema([
+                Infolists\Components\RepeatableEntry::make('repeatable')
+                    ->schema([
+                        Infolists\Components\Section::make('test')
+                            // both repeatable entries show the data of the first entry
+                            ->schema([
+                                Infolists\Components\TextEntry::make('name'),
+                                Infolists\Components\TextEntry::make('email'),
+                            ])
+                            // uncommenting the lines below, where schema is returned as a closure, fixes the issue
+                            // ->schema(fn () =>[
+                            //     Infolists\Components\TextEntry::make('name'),
+                            //     Infolists\Components\TextEntry::make('email'),
+                            // ])
+                    ]),
             ]);
     }
 
@@ -46,14 +77,14 @@ class UserResource extends Resource
                 ]),
             ]);
     }
-    
+
     public static function getRelations(): array
     {
         return [
             //
         ];
     }
-    
+
     public static function getPages(): array
     {
         return [
@@ -62,5 +93,5 @@ class UserResource extends Resource
             'view' => Pages\ViewUser::route('/{record}'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
-    }    
+    }
 }
